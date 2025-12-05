@@ -1,10 +1,8 @@
 ---
 layout: distill
 title: Sample Blog Post
-description: Your blog post's abstract.
-  Please add your abstract or summary here and not in the main body of your text.
-  Do not include math/latex or hyperlinks.
-date: 2026-04-27
+description: Denoising Diffusion Probabilistic Models (DDPMs) and Hierarchical Variational Autoencoders (HVAEs) are typically studied as distinct paradigms for high-dimensional generative modeling. In this work, we bridge this gap by establishing a formal equivalence between DDPMs and HVAEs in the limit of infinite depth with a fixed, Markovian inference process. We argue that this architectural isomorphism is not merely a mathematical curiosity but the structural key to understanding the superior generalization capabilities of diffusion models. By viewing the forward diffusion process as a fixed encoder, we elucidate how DDPMs circumvent the posterior collapse often observed in deep VAEs, effectively balancing the trade-off between structural guidance and texture synthesis. We support this theoretical unification with empirical analysis of the semantic phase transitions in latent space and demonstrate the invariance of the Variational Lower Bound under noise schedule reparameterizations, confirming the interpretation of diffusion as a continuous-time hierarchical variational framework.
+date: 2025-12-05
 future: true
 htmlwidgets: true
 hidden: true
