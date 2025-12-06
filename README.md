@@ -1,6 +1,6 @@
-# Our use:
+# Steps:
 ```bash
-git git@github.com:oublalkhalid/Blogpost-ICLR2026.git
+git clone git@github.com:oublalkhalid/Blogpost-ICLR2026.git
 cd Blogpost-ICLR2026/
 bundle install
 bundle exec jekyll serve
