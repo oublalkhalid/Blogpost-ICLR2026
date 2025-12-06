@@ -90,9 +90,9 @@ You will be submitting a pull request this repository.
 
 ### Creating a Blog Post
 
-To create a blog post in Markdown format, you can modify the [example]({% post_url 2026-04-27-distill-example %}) Markdown post `_posts/2026-04-27-distill-example.md` and rename it to `_posts/2026-04-27-[SUBMISSION NAME].md`, where `[SUBMISSION NAME]` is the name of your submission. You can see the result of the sample post .
+To create a blog post in Markdown format, you can modify the [example]({% post_url 2026-04-27-generalization-in-diffusion-as-infinite-hvae %}) Markdown post `_posts/2026-04-27-generalization-in-diffusion-as-infinite-hvae.md` and rename it to `_posts/2026-04-27-[SUBMISSION NAME].md`, where `[SUBMISSION NAME]` is the name of your submission. You can see the result of the sample post .
 
-While most users will want to create a post in the Markdown format, it is also possible to create a post in HTML format. For this, modify instead the example `_posts/2026-04-27-distill-example2.html` and rename it to `_posts/2026-04-27-[SUBMISSION NAME].html`. (NOTE: HTML is not officially supported, use at your own risk).
+While most users will want to create a post in the Markdown format, it is also possible to create a post in HTML format. For this, modify instead the example `_posts/2026-04-27-generalization-in-diffusion-as-infinite-hvae2.html` and rename it to `_posts/2026-04-27-[SUBMISSION NAME].html`. (NOTE: HTML is not officially supported, use at your own risk).
 
 You must modify the file's header (or 'front-matter') as needed.
 
@@ -125,7 +125,7 @@ authors:
 #       name: IAS, Princeton
 
 # must be the exact same name as your blogpost
-bibliography: 2026-04-27-distill-example.bib
+bibliography: 2026-04-27-generalization-in-diffusion-as-infinite-hvae.bib
 
 # Add a table of contents to your post.
 #   - make sure that TOC names match the actual section names
@@ -147,7 +147,7 @@ submission is anonymous for the review process**).
 
 <!-- Add any tags that are relevant to your post, such as the areas your work is relevant to. -->
 
-Read our [sample blog post]({% post_url 2026-04-27-distill-example %}) carefully to see how you can add image assets, and how to write using $$\LaTeX$$!
+Read our [sample blog post]({% post_url 2026-04-27-generalization-in-diffusion-as-infinite-hvae %}) carefully to see how you can add image assets, and how to write using $$\LaTeX$$!
 Read about rendering your post locally [below](#serving).
 
 **Important: make sure your post is completely anonymized before you export and submit it!**
@@ -260,9 +260,9 @@ To submit your blog post:
      - static image assets added to `assets/img/2026-04-27-[SUBMISSION NAME]/`
      - interactive HTML figures added to `assets/html/2026-04-27-[SUBMISSION NAME]/`
      - citations in a bibtex file in `assets/bibliography/2026-04-27-[SUBMISSION NAME].bib`
-   - Have a short 2-3 sentence abstract in the `description` field of your front-matter ([example](https://github.com/iclr-blogposts/2026/blob/main/_posts/2026-04-27-distill-example.md?plain=1#L4-L6))
+   - Have a short 2-3 sentence abstract in the `description` field of your front-matter ([example](https://github.com/iclr-blogposts/2026/blob/main/_posts/2026-04-27-generalization-in-diffusion-as-infinite-hvae.md?plain=1#L4-L6))
       - Please make sure to not include special characters like `"` in your description since it may cause the bibliography to not render correctly. 
-   - Have a table of contents, formatted using the `toc` field of your front-matter ([example](https://github.com/iclr-blogposts/2026/blob/main/_posts/2026-04-27-distill-example.md?plain=1#L36-L47))
+   - Have a table of contents, formatted using the `toc` field of your front-matter ([example](https://github.com/iclr-blogposts/2026/blob/main/_posts/2026-04-27-generalization-in-diffusion-as-infinite-hvae.md?plain=1#L36-L47))
    - Your bibliography uses a `.bibtex` file as per the sample post
 3. Open a pull request against the `main` branch of the [2026 repo](https://github.com/iclr-blogposts/2026).
    Fill in the checklist provided in the PR template. The title of your pull request should be

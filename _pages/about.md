@@ -80,7 +80,7 @@ We will only ask the authors to report if they have a conflict of interest. If s
 
 ## Publication
 
-The posts will be created and published under a unified template; see [the submission instructions]({{ '/submitting' | relative_url }}) and the [sample post]({% post_url 2026-04-27-distill-example %}) hosted on the blog of this website.
+The posts will be created and published under a unified template; see [the submission instructions]({{ '/submitting' | relative_url }}) and the [sample post]({% post_url 2026-04-27-generalization-in-diffusion-as-infinite-hvae %}) hosted on the blog of this website.
 
 #### Poster
 
