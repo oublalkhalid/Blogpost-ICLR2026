@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Performative Prediction Risk Iterations</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: transparent;
+            overflow-y: scroll;
+            height: 205vh; /* Exact height for scrolling - ends when animation completes */
+        }
+        
+        #iteration-scroll-container {
+            height: 205vh; /* Matches body height - scroll ends when last point appears */
+            position: relative;
+        }
+        
+        #iteration-fixed-wrapper {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            gap: 32px;
+        }
+        
+        #iteration-fixed-image {
+            flex: 0 0 auto;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 0;
+        }
+        
+        #iteration-image {
+            max-width: 75%;
+            max-height: 28vh;
+            height: auto;
+            display: block;
+        }
+        
+        #risk-chart {
+            flex: 0 0 auto;
+            width: 100%;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            margin-top: 0;
+        }
+        .instructions {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        
+        svg {
+            overflow: visible;
+        }
+    </style>
+</head>
+<body>
+    <div id="iteration-scroll-container">
+        <div id="iteration-fixed-wrapper">
+            <div class="instructions">
+                Scroll through the optimization process
+            </div>
+            <div id="iteration-fixed-image">
+                <img id="iteration-image" src="../../img/2026-04-27-performative-prediction/iterations/decoupled_iteration_1.png" alt="Iteration visualization">
+            </div>
+            <div id="risk-chart"></div>
+        </div>
+    </div>
+
+    <script>
+        // Risk chart visualization with progressive drawing
+        (async function() {
+            const container = document.getElementById('risk-chart');
+            if (!container) return;
+
+            // Load data
+            const cacheBuster = new Date().getTime();
+            const data = await d3.json(`./json/risk_iterations.json?v=${cacheBuster}`);
+            const points = data.points;
+
+            // Store references for progressive drawing
+            let allLines = [];
+            let allPoints = [];
+            let allAnnotations = [];
+
+            // Set up dimensions
+            const containerHeight = 320;
+            const margin = { top: 0, right: 80, bottom: 50, left: 50 };
+            const width = 760 - margin.left - margin.right;
+            const height = containerHeight - margin.top - margin.bottom;
+
+            // Create SVG
+            const svg = d3.select('#risk-chart')
+                .append('svg')
+                .attr('viewBox', `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+                .attr('width', '100%')
+                .style('max-width', '680px')
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Set up scales
+            const values = points.map(p => p.value);
+            const minVal = d3.min(values);
+            const maxVal = d3.max(values);
+            const padding = Math.max((maxVal - minVal) * 0.1, 1);
+
+            const xScale = d3.scaleLinear()
+                .domain([0, 6])
+                .range([0, width]);
+
+            const yScale = d3.scaleLinear()
+                .domain([minVal - padding, maxVal + padding])
+                .range([height, 0]);
+
+            // Add axes
+            const xAxis = d3.axisBottom(xScale).ticks(7);
+            const yAxis = d3.axisLeft(yScale).ticks(7);
+
+            svg.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(xAxis)
+                .style('font-size', '12px');
+
+            svg.append('g')
+                .call(yAxis)
+                .style('font-size', '12px');
+
+            // Add axis labels
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', height + 40)
+                .style('text-anchor', 'middle')
+                .style('font-size', '12px')
+                .text('Iteration');
+
+            svg.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('x', -height / 2)
+                .attr('y', -32)
+                .style('text-anchor', 'middle')
+                .style('font-size', '12px')
+                .text('Risk');
+
+            // Create lines (initially hidden)
+            for (let i = 0; i < points.length - 1; i++) {
+                const currentPoint = points[i];
+                const nextPoint = points[i + 1];
+                const lineColor = currentPoint.color === 'blue' ? '#8DA0CB' : '#E5C494';
+
+                const line = svg.append('line')
+                    .attr('x1', xScale(currentPoint.iteration))
+                    .attr('y1', yScale(currentPoint.value))
+                    .attr('x2', xScale(nextPoint.iteration))
+                    .attr('y2', yScale(nextPoint.value))
+                    .attr('stroke', lineColor)
+                    .attr('stroke-width', 2)
+                    .attr('opacity', 0);
+
+                allLines.push(line);
+            }
+
+            // Create all points (initially hidden)
+            points.forEach(point => {
+                const circle = svg.append('circle')
+                    .attr('cx', xScale(point.iteration))
+                    .attr('cy', yScale(point.value))
+                    .attr('r', 5)
+                    .attr('fill', point.color === 'blue' ? '#8DA0CB' : '#E5C494')
+                    .attr('opacity', 0);
+
+                allPoints.push(circle);
+            });
+
+            // Create annotations
+            points.forEach((point, index) => {
+                if (!point.annotations) return;
+
+                point.annotations.forEach(annotation => {
+                    if (annotation.type !== 'line') return;
+
+                    const pointColor = point.color === 'blue' ? '#8DA0CB' : '#E5C494';
+                    const xPos = xScale(point.iteration);
+                    const yPos = yScale(point.value);
+                    const nextPoint = points[index + 1];
+                    if (!nextPoint) return;
+
+                    const midX = (xPos + xScale(nextPoint.iteration)) / 2;
+                    const midY = (yPos + yScale(nextPoint.value)) / 2;
+                    const annotationGroup = svg.append('g').attr('opacity', 0);
+
+                    const translateX = annotation.translateX || 0;
+                    const translateY = annotation.translateY || 0;
+                    const textX = midX + 50 + translateX;
+                    const textY = midY - 20 + translateY;
+                    
+                    // Convert <sub>X</sub> to SVG tspans
+                    function renderTextWithSubscripts(textEl, str) {
+                        const parts = str.split(/(<sub>[^<]+<\/sub>)/g);
+                        parts.forEach(part => {
+                            const subMatch = part.match(/<sub>([^<]+)<\/sub>/);
+                            if (subMatch) {
+                                textEl.append('tspan')
+                                    .attr('baseline-shift', 'sub')
+                                    .attr('font-size', '70%')
+                                    .text(subMatch[1]);
+                            } else if (part) {
+                                textEl.append('tspan').text(part);
+                            }
+                        });
+                    }
+
+                    const textEl = annotationGroup.append('text')
+                        .attr('x', textX)
+                        .attr('y', textY)
+                        .style('font-size', '14px')
+                        .style('fill', pointColor);
+                    renderTextWithSubscripts(textEl, annotation.text);
+
+                    const dx = midX - textX;
+                    const dy = midY - textY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const unitX = dx / distance;
+                    const unitY = dy / distance;
+
+                    const arrowStartX = textX + unitX * 10;
+                    const arrowStartY = textY + unitY * 10;
+                    const arrowEndX = midX - unitX * 5;
+                    const arrowEndY = midY - unitY * 5;
+
+                    if (point.iteration === 6) {
+                        arrowStartY = arrowStartY - 7;
+                        console.log('here');
+                    }
+
+                    annotationGroup.append('path')
+                        .attr('d', `M ${arrowStartX} ${arrowStartY} L ${arrowEndX} ${arrowEndY}`)
+                        .attr('fill', 'none')
+                        .attr('stroke', pointColor)
+                        .attr('stroke-width', 1.5)
+                        .attr('marker-end', `url(#arrowhead-${point.color})`);
+
+                    allAnnotations.push({ element: annotationGroup, index, type: 'line' });
+                });
+            });
+
+            // Second pass: point annotations
+            points.forEach((point, index) => {
+                if (!point.annotations) return;
+
+                point.annotations.forEach(annotation => {
+                    if (annotation.type !== 'point') return;
+
+                    const xPos = xScale(point.iteration);
+                    const yPos = yScale(point.value);
+                    const annotationGroup = svg.append('g').attr('opacity', 0);
+
+                    const translateX = annotation.translateX || 0;
+                    const translateY = annotation.translateY || 0;
+                    const textX = xPos + 80 + translateX;
+                    const textY = yPos - 30 + translateY;
+                    
+                    // Convert <sub>X</sub> to SVG tspans
+                    function renderTextWithSubscripts(textEl, str) {
+                        const parts = str.split(/(<sub>[^<]+<\/sub>)/g);
+                        parts.forEach(part => {
+                            const subMatch = part.match(/<sub>([^<]+)<\/sub>/);
+                            if (subMatch) {
+                                textEl.append('tspan')
+                                    .attr('baseline-shift', 'sub')
+                                    .attr('font-size', '70%')
+                                    .text(subMatch[1]);
+                            } else if (part) {
+                                textEl.append('tspan').text(part);
+                            }
+                        });
+                    }
+
+                    const textEl = annotationGroup.append('text')
+                        .attr('x', textX)
+                        .attr('y', textY)
+                        .style('font-size', '14px')
+                        .style('font-style', 'italic');
+                    renderTextWithSubscripts(textEl, annotation.text);
+
+                    const dx = xPos - textX;
+                    const dy = yPos - textY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const unitX = dx / distance;
+                    const unitY = dy / distance;
+
+                    const arrowStartX = textX + unitX * 15;
+                    let arrowStartY = textY + unitY * 15;
+                    const arrowEndX = xPos - unitX * 10;
+                    const arrowEndY = yPos - unitY * 10;
+
+                    if (point.iteration === 6) {
+                        arrowStartY = arrowStartY - 7;
+                        console.log('here');
+                    }
+
+
+                    annotationGroup.append('path')
+                        .attr('d', `M ${arrowStartX} ${arrowStartY} L ${arrowEndX} ${arrowEndY}`)
+                        .attr('fill', 'none')
+                        .attr('stroke', 'black')
+                        .attr('stroke-width', 1.5)
+                        .attr('marker-end', 'url(#arrowhead-black)');
+
+                    allAnnotations.push({ element: annotationGroup, index, type: 'point' });
+                });
+            });
+
+            // Define arrowhead markers
+            const defs = svg.append('defs');
+
+            ['blue', 'orange', 'black'].forEach(color => {
+                const fillColor = color === 'blue' ? '#8DA0CB' : color === 'orange' ? '#E5C494' : 'black';
+                defs.append('marker')
+                    .attr('id', `arrowhead-${color}`)
+                    .attr('viewBox', '0 0 10 10')
+                    .attr('refX', 8)
+                    .attr('refY', 5)
+                    .attr('markerWidth', 6)
+                    .attr('markerHeight', 6)
+                    .attr('orient', 'auto')
+                    .append('path')
+                    .attr('d', 'M 0 0 L 10 5 L 0 10 z')
+                    .attr('fill', fillColor);
+            });
+
+            // Images for synchronized updates
+            const iterationImages = [
+                '../../img/2026-04-27-performative-prediction/iterations/decoupled_iteration_1.png',
+                '../../img/2026-04-27-performative-prediction/iterations/decoupled_iteration_2.png',
+                '../../img/2026-04-27-performative-prediction/iterations/decoupled_iteration_3.png',
+                '../../img/2026-04-27-performative-prediction/iterations/decoupled_iteration_4.png'
+            ];
+            const iterationImage = document.getElementById('iteration-image');
+
+            // Combined update function - graph AND image update together
+            function updateDrawing() {
+                const scrollContainer = document.getElementById('iteration-scroll-container');
+                if (!scrollContainer) return;
+
+                const rect = scrollContainer.getBoundingClientRect();
+                const containerTop = rect.top;
+                const containerHeight = rect.height;
+                const viewportHeight = window.innerHeight;
+
+                // Only start when container reaches top
+                if (containerTop > 0) {
+                    if (allPoints.length > 0) {
+                        allPoints[0].attr('opacity', 1);
+                    }
+                    for (let i = 1; i < allPoints.length; i++) {
+                        allPoints[i].attr('opacity', 0);
+                    }
+                    allLines.forEach(line => line.attr('opacity', 0));
+                    allAnnotations.forEach(({ element }) => element.attr('opacity', 0));
+                    // Set first image
+                    if (iterationImage && !iterationImage.src.endsWith(iterationImages[0].split('/').pop())) {
+                        iterationImage.src = iterationImages[0];
+                    }
+                    return;
+                }
+
+                const scrollProgress = Math.max(0, Math.min(1, -containerTop / (containerHeight - viewportHeight)));
+                // Total elements = points + lines, animation completes exactly at scroll end
+                const totalElements = allPoints.length + allLines.length;
+                const elementsToShow = Math.max(1, Math.floor(scrollProgress * totalElements) + 1);
+
+                let elementCount = 0;
+
+                for (let i = 0; i < allPoints.length; i++) {
+                    if (elementCount < elementsToShow) {
+                        allPoints[i].attr('opacity', 1);
+                        elementCount++;
+                    } else {
+                        allPoints[i].attr('opacity', 0);
+                    }
+
+                    if (i < allLines.length) {
+                        if (elementCount < elementsToShow) {
+                            allLines[i].attr('opacity', 1);
+                            elementCount++;
+                        } else {
+                            allLines[i].attr('opacity', 0);
+                        }
+                    }
+                }
+
+                // Show annotations
+                allAnnotations.forEach(({ element, index, type }) => {
+                    if (type === 'line') {
+                        const lineElementPosition = (index * 2) + 1;
+                        element.attr('opacity', lineElementPosition < elementsToShow ? 1 : 0);
+                    } else if (type === 'point') {
+                        const pointElementPosition = index * 2;
+                        element.attr('opacity', pointElementPosition < elementsToShow ? 1 : 0);
+                    }
+                });
+
+                // Update image simultaneously with graph (1:1 - cycles through 4 images)
+                if (iterationImage) {
+                    const imageIndex = (elementsToShow - 1) % 4;
+                    if (!iterationImage.src.endsWith(iterationImages[imageIndex].split('/').pop())) {
+                        iterationImage.src = iterationImages[imageIndex];
+                    }
+                }
+            }
+
+            window.addEventListener('scroll', updateDrawing);
+            setTimeout(updateDrawing, 100);
+            updateDrawing();
+        })();
+    </script>
+</body>
+</html>
+
+
